@@ -1,7 +1,7 @@
 name: tm
 description: Time Machine for Flutter, inspired by macOS.
 version: 0.0.1
-homepage:
+homepage: https://github.com/glorylab/TimeMachine
 
 environment:
   sdk: ">=2.17.1 <3.0.0"
