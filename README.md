@@ -1,6 +1,6 @@
 # tm - Time Machine
 
-<img src='assets/timemachine_banner.png' width="1000" height="auto" alt="Flutter package: tm - Time Machine" />
+<img src='https://github.com/glorylab/TimeMachine/blob/main/assets/timemachine_banner.png?raw=true' width="1000" height="auto" alt="Flutter package: tm - Time Machine" />
 
 ---
 
