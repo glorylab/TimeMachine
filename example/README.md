@@ -12,3 +12,10 @@ Time Machine for Flutter, inspired by macOS.
 --- 
 
 > This package is under development.
+
+## Demo
+
+| Platform  | Branch    | URL   | 
+| :-        | -:        | :-    |
+| Web       | `master`  | [tm.glorylab.xyz](https://tm.glorylab.xyz "The demo page of the tm package.") |
+| Web       | `develop` | [dev.tm.glorylab.xyz](https://dev.tm.glorylab.xyz "The demo page of the tm package's develop branch.") |

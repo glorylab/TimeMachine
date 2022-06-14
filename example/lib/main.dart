@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:tm/data.dart';
 import 'package:tm/tm.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -20,15 +21,13 @@ class TimeMachineDemoApp extends StatelessWidget {
         primarySwatch: Colors.purple,
         useMaterial3: true,
       ),
-      home: const TimeMachineHomePage(title: appName),
+      home: const TimeMachineHomePage(),
     );
   }
 }
 
 class TimeMachineHomePage extends StatefulWidget {
-  const TimeMachineHomePage({Key? key, required this.title}) : super(key: key);
-
-  final String title;
+  const TimeMachineHomePage({Key? key}) : super(key: key);
 
   @override
   State<TimeMachineHomePage> createState() => _TimeMachineHomePageState();
@@ -43,7 +42,7 @@ class _TimeMachineHomePageState extends State<TimeMachineHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: const Text(appName),
         elevation: 2.0,
         actions: [
           IconButton(
@@ -62,13 +61,78 @@ class _TimeMachineHomePageState extends State<TimeMachineHomePage> {
       body: Center(
         child: ListView(
           children: <Widget>[
-            const Align(
-              child: SizedBox(
-                width: 320.0,
-                height: 200.0,
-                child: TimeMachine(
-                  size: Size(200.0, 200.0),
-                  backgroundColor: Colors.green,
+            const SizedBox(
+              height: 16,
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Align(
+                child: SizedBox(
+                  height: 288,
+                  width: 512,
+                  child: Material(
+                    color: Colors.indigo,
+                    clipBehavior: Clip.antiAlias,
+                    shape: ContinuousRectangleBorder(
+                        borderRadius: BorderRadius.circular(64)),
+                    child: TimeMachine.observatory(
+                      size: const Size(200.0, 200.0),
+                      backgroundColor: Colors.white,
+                      data: const TMData(cards: [
+                        TMCard(
+                            title: 'title',
+                            subTitle: 'subTitle',
+                            description: 'description',
+                            content: Center(child: Text('content 1'))),
+                        TMCard(
+                            title: 'title',
+                            subTitle: 'subTitle',
+                            description: 'description',
+                            content: Center(child: Text('content 2'))),
+                        TMCard(
+                            title: 'title',
+                            subTitle: 'subTitle',
+                            description: 'description',
+                            content: Center(child: Text('content 3'))),
+                      ]),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(
+              height: 16,
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Align(
+                child: SizedBox(
+                  height: 288,
+                  width: 512,
+                  child: Material(
+                    color: Colors.indigoAccent,
+                    clipBehavior: Clip.antiAlias,
+                    shape: ContinuousRectangleBorder(
+                        borderRadius: BorderRadius.circular(64)),
+                    child: TimeMachine.observatory(
+                      size: const Size(300.0, 200.0),
+                      backgroundColor: Colors.white70,
+                      cardShape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(2)),
+                      data: const TMData(cards: [
+                        TMCard(
+                            title: 'title',
+                            subTitle: 'subTitle',
+                            description: 'description',
+                            content: Center(child: Text('content 1'))),
+                        TMCard(
+                            title: 'title',
+                            subTitle: 'subTitle',
+                            description: 'description',
+                            content: Center(child: Text('content 2'))),
+                      ]),
+                    ),
+                  ),
                 ),
               ),
             ),
