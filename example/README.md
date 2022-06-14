@@ -1,16 +1,14 @@
-# demo_tm
+# tm - Time Machine
 
-A new Flutter project.
+<img src='../assets/timemachine_banner.png' width="1000" height="auto" alt="Flutter package: tm - Time Machine" />
 
-## Getting Started
+---
 
-This project is a starting point for a Flutter application.
+[![Pub](https://img.shields.io/pub/v/tm.svg?logo=flutter&style=flat-square)](https://pub.dev/packages/wave)
+![GitHub](https://img.shields.io/github/license/mashape/apistatus.svg?longCache=true&style=flat-square)
 
-A few resources to get you started if this is your first Flutter project:
+Time Machine for Flutter, inspired by macOS.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+--- 
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+> This package is under development.
