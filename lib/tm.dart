@@ -1,9 +1,40 @@
 library tm;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tm/card_container.dart';
 import 'package:tm/data.dart';
+import 'package:tm/status.dart';
 
-class TimeMachine extends StatefulWidget {
+const int defaultVisiblePageCount = 4;
+
+enum MoveType {
+  next,
+  back,
+}
+
+enum MachineType {
+  observatory,
+}
+
+final statusProvider = StateNotifierProvider<StatusNotifier, TimeMachineStatus>(
+    (ref) => StatusNotifier(TimeMachineStatus.init()));
+
+final edgeProvider = Provider((ref) {
+  final TimeMachineStatus status = ref.watch(statusProvider);
+  if (status.count == 1) {
+    return 0;
+  } else if (status.count == status.currentIndex + 1) {
+    return 1;
+  } else if (status.count == 0) {
+    return -1;
+  }
+  return null;
+});
+
+class TimeMachine extends StatelessWidget {
+  final MachineType type;
+
   /// The size of Time Machine.
   final Size size;
 
@@ -13,65 +44,124 @@ class TimeMachine extends StatefulWidget {
   /// The shape of Cards.
   final ShapeBorder? cardShape;
 
-  /// The visible pages of cards.
-  final int? visiblePages;
+  /// The visible page count of cards.
+  final int? visiblePageCount;
 
   /// The data of Time Machine.
   final TMData data;
 
-  const TimeMachine({
+  const TimeMachine(
+      {super.key,
+      required this.type,
+      required this.size,
+      required this.backgroundColor,
+      this.cardShape,
+      this.visiblePageCount,
+      required this.data});
+
+  _getTimeMachine() {
+    switch (type) {
+      default:
+        return BaseTimeMachine.observatory(
+          size: size,
+          backgroundColor: backgroundColor,
+          cardShape: cardShape,
+          data: data,
+        );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ProviderScope(child: _getTimeMachine());
+  }
+}
+
+class BaseTimeMachine extends ConsumerStatefulWidget {
+  /// The size of Time Machine.
+  final Size size;
+
+  /// The background color of Time Machine.
+  final Color backgroundColor;
+
+  /// The shape of Cards.
+  final ShapeBorder? cardShape;
+
+  /// The visible page count of cards.
+  final int? visiblePageCount;
+
+  /// The data of Time Machine.
+  final TMData data;
+
+  final TimeMachineController timeMachineController;
+
+  const BaseTimeMachine({
     Key? key,
     this.size = const Size(double.infinity, double.infinity),
     this.backgroundColor = Colors.white,
-    this.visiblePages = 3,
+    this.visiblePageCount = defaultVisiblePageCount,
     this.cardShape,
     required this.data,
+    required this.timeMachineController,
   }) : super(key: key);
 
   /// The first style of Time Machine.
-  factory TimeMachine.observatory({
+  factory BaseTimeMachine.observatory({
     TMData? data,
     Size? size,
     Color? backgroundColor,
     ShapeBorder? cardShape,
     int? visiblePages,
+    TimeMachineController? timeController,
   }) =>
-      TimeMachine(
+      BaseTimeMachine(
         data: data ?? TMData.placeholder(),
         size: size!,
         backgroundColor: backgroundColor!,
         cardShape: cardShape,
-        visiblePages: visiblePages ?? 3,
+        visiblePageCount: visiblePages ?? defaultVisiblePageCount,
+        timeMachineController:
+            timeController ?? const ButtonTimeMachineController(),
       );
 
   @override
-  State<TimeMachine> createState() => _TimeMachineState();
+  TimeMachineState createState() => TimeMachineState();
 }
 
-class _TimeMachineState extends State<TimeMachine> {
+class TimeMachineState extends ConsumerState<BaseTimeMachine> {
   double paddingTop = 32;
   double staggeredDistance = 0;
-  int visiblePages = 1;
+  int visiblePageCount = defaultVisiblePageCount;
 
-  /// Build a stacked list of cards,
-  /// showing by default the entire contents of the first page
-  /// and the headers of next two pages.
-  List<Positioned> _buildCards() {
+  _getVisibleCards(WidgetRef ref) {
+    final currentCardIndex = ref.watch(statusProvider).currentIndex;
     List<TMCard> data;
     if (widget.data.cards.isEmpty) {
       data = TMData.placeholder().cards;
     } else {
-      if (widget.visiblePages != null &&
-          widget.data.cards.length > widget.visiblePages!) {
-        visiblePages = widget.visiblePages!;
+      if (widget.visiblePageCount != null &&
+          widget.data.cards.length > widget.visiblePageCount!) {
+        visiblePageCount = widget.visiblePageCount!;
       } else {
-        visiblePages =
-            widget.data.cards.length > 3 ? 3 : widget.data.cards.length;
+        visiblePageCount = widget.data.cards.length > widget.visiblePageCount!
+            ? widget.visiblePageCount!
+            : widget.data.cards.length;
       }
-      data = widget.data.cards.take(visiblePages).toList();
+      data = widget.data.cards
+          .skip(currentCardIndex)
+          .take(visiblePageCount)
+          .toList();
     }
+    return data;
+  }
 
-    staggeredDistance = paddingTop / visiblePages;
+  /// Build a stacked list of cards,
+  /// showing by default the entire contents of the first page
+  /// and the headers of next two pages.
+  List<Positioned> _buildCards(WidgetRef ref) {
+    List<TMCard> data = _getVisibleCards(ref);
+
+    staggeredDistance = paddingTop / visiblePageCount;
 
     List<Positioned> cards = [];
 
@@ -99,47 +189,107 @@ class _TimeMachineState extends State<TimeMachine> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    ref.read(statusProvider.notifier).updateCount(widget.data.cards.length);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: _buildCards(),
+    return Column(
+      children: [
+        Expanded(
+          child: Consumer(
+            builder: (context, ref, _) {
+              return Stack(
+                children: _buildCards(ref),
+              );
+            },
+          ),
+        ),
+        widget.timeMachineController,
+      ],
     );
   }
 }
 
-class TMCardContainer extends StatelessWidget {
-  final Color backgroundColor;
-  final ShapeBorder cardShape;
-  final Size size;
-  final EdgeInsets margin;
-  final Widget child;
+abstract class TimeMachineController extends ConsumerWidget {
+  const TimeMachineController({Key? key}) : super(key: key);
+  onMove(MoveType moveType, WidgetRef ref);
 
-  const TMCardContainer({
-    super.key,
-    required this.backgroundColor,
-    required this.cardShape,
-    required this.size,
-    required this.child,
-    this.margin = const EdgeInsets.all(0),
-  });
+  buildWidget(WidgetRef ref);
+
   @override
-  Widget build(BuildContext context) {
-    return Align(
-      child: Container(
-        constraints: BoxConstraints.expand(
-          width: size.width,
-          height: size.height,
-        ),
-        child: Padding(
-          padding: margin,
-          child: Material(
-            color: backgroundColor,
-            shape: cardShape,
-            elevation: 12,
-            shadowColor: Colors.black54,
-            child: child,
+  Widget build(BuildContext context, WidgetRef ref) {
+    return buildWidget(ref);
+  }
+}
+
+class ButtonTimeMachineController extends TimeMachineController {
+  const ButtonTimeMachineController({Key? key}) : super(key: key);
+
+  _getOnPressed(MoveType moveType, WidgetRef ref) {
+    final int? edge = ref.watch(edgeProvider);
+    switch (edge) {
+      case -1:
+        if (moveType == MoveType.back) {
+          return;
+        }
+        return onMove(moveType, ref);
+      case 1:
+        if (moveType == MoveType.next) {
+          return;
+        }
+        return onMove(moveType, ref);
+      case null:
+      default:
+        return onMove(moveType, ref);
+    }
+  }
+
+  @override
+  buildWidget(WidgetRef ref) {
+    return SizedBox(
+      height: 72,
+      width: 256,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          RawMaterialButton(
+            onPressed: () => _getOnPressed(MoveType.back, ref),
+            fillColor: Colors.yellow[100],
+            elevation: 0,
+            shape: ContinuousRectangleBorder(
+                borderRadius: BorderRadius.circular(16)),
+            child: const Text('back'),
           ),
-        ),
+          const SizedBox(
+            width: 16,
+          ),
+          RawMaterialButton(
+            onPressed: () => _getOnPressed(MoveType.next, ref),
+            fillColor: Colors.yellow[100],
+            elevation: 0,
+            shape: ContinuousRectangleBorder(
+                borderRadius: BorderRadius.circular(16)),
+            child: const Text('next'),
+          ),
+        ],
       ),
     );
+  }
+
+  @override
+  onMove(MoveType moveType, WidgetRef ref) {
+    switch (moveType) {
+      case MoveType.next:
+        ref.read(statusProvider.notifier).add(1);
+        break;
+      case MoveType.back:
+        ref.read(statusProvider.notifier).reduce(1);
+        break;
+      default:
+        return;
+    }
   }
 }

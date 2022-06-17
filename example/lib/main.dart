@@ -1,5 +1,6 @@
+import 'package:demo_tm/footer.dart';
+import 'package:demo_tm/pylon.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:tm/data.dart';
 import 'package:tm/tm.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -22,6 +23,7 @@ class TimeMachineDemoApp extends StatelessWidget {
         useMaterial3: true,
       ),
       home: const TimeMachineHomePage(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
@@ -68,33 +70,26 @@ class _TimeMachineHomePageState extends State<TimeMachineHomePage> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Align(
                 child: SizedBox(
-                  height: 288,
+                  height: 384,
                   width: 512,
                   child: Material(
                     color: Colors.indigo,
                     clipBehavior: Clip.antiAlias,
                     shape: ContinuousRectangleBorder(
                         borderRadius: BorderRadius.circular(64)),
-                    child: TimeMachine.observatory(
-                      size: const Size(200.0, 200.0),
-                      backgroundColor: Colors.white,
-                      data: const TMData(cards: [
-                        TMCard(
-                            title: 'title',
-                            subTitle: 'subTitle',
-                            description: 'description',
-                            content: Center(child: Text('content 1'))),
-                        TMCard(
-                            title: 'title',
-                            subTitle: 'subTitle',
-                            description: 'description',
-                            content: Center(child: Text('content 2'))),
-                        TMCard(
-                            title: 'title',
-                            subTitle: 'subTitle',
-                            description: 'description',
-                            content: Center(child: Text('content 3'))),
-                      ]),
+                    child: SizedBox.expand(
+                      child: Column(
+                        children: [
+                          Expanded(
+                            child: TimeMachine(
+                              type: MachineType.observatory,
+                              size: const Size(200.0, 200.0),
+                              backgroundColor: Colors.white,
+                              data: TMData(cards: Pylon.generateCards()),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -107,30 +102,20 @@ class _TimeMachineHomePageState extends State<TimeMachineHomePage> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Align(
                 child: SizedBox(
-                  height: 288,
+                  height: 384,
                   width: 512,
                   child: Material(
                     color: Colors.indigoAccent,
                     clipBehavior: Clip.antiAlias,
                     shape: ContinuousRectangleBorder(
                         borderRadius: BorderRadius.circular(64)),
-                    child: TimeMachine.observatory(
+                    child: TimeMachine(
+                      type: MachineType.observatory,
                       size: const Size(300.0, 200.0),
-                      backgroundColor: Colors.white70,
+                      backgroundColor: Colors.white,
                       cardShape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(2)),
-                      data: const TMData(cards: [
-                        TMCard(
-                            title: 'title',
-                            subTitle: 'subTitle',
-                            description: 'description',
-                            content: Center(child: Text('content 1'))),
-                        TMCard(
-                            title: 'title',
-                            subTitle: 'subTitle',
-                            description: 'description',
-                            content: Center(child: Text('content 2'))),
-                      ]),
+                      data: TMData(cards: Pylon.generateCards()),
                     ),
                   ),
                 ),
@@ -139,26 +124,7 @@ class _TimeMachineHomePageState extends State<TimeMachineHomePage> {
             const SizedBox(
               height: 88,
             ),
-            Container(
-                alignment: Alignment.center,
-                margin: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    Image.asset(
-                      'icons/ic_glory_lab.png',
-                      package: 'web3_icons',
-                      width: 32.0,
-                      height: 32.0,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Made in Glory Lab',
-                      style: GoogleFonts.robotoMono(
-                        color: Colors.grey[500],
-                      ),
-                    )
-                  ],
-                )),
+            const GloryFooter()
           ],
         ),
       ),
